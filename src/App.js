@@ -1,55 +1,89 @@
 import React from "react";
-import "./styles.css";
+// import logo from './logo.svg';
+import "./App.css";
+import ListItems from "./ListItems";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+
+library.add(faTrash);
 
 class App extends React.Component {
-  constructor() {
-    super();
-
+  constructor(props) {
+    super(props);
     this.state = {
-      item: "item",
-      items: []
+      items: [],
+      currentItem: {
+        text: "",
+        key: ""
+      }
     };
-
-    this.handleInputChange = this.handleInputChange.bind(this);
-    this.submitItem = this.submitItem.bind(this);
+    this.addItem = this.addItem.bind(this);
+    this.handleInput = this.handleInput.bind(this);
+    this.deleteItem = this.deleteItem.bind(this);
+    this.setUpdate = this.setUpdate.bind(this);
   }
-
-  handleInputChange(event) {
-    let name = event.target.name;
-    let value = event.target.value;
-
-    this.setState({ [name]: value });
+  addItem(e) {
+    e.preventDefault();
+    const newItem = this.state.currentItem;
+    if (newItem.text !== "") {
+      const items = [...this.state.items, newItem];
+      this.setState({
+        items: items,
+        currentItem: {
+          text: "",
+          key: ""
+        }
+      });
+    }
   }
-
-  submitItem() {
-    let items = this.state.items;
-    let item = this.state.item;
-
-    items.push(item);
-
-    this.setState({ items: items });
+  handleInput(e) {
+    this.setState({
+      currentItem: {
+        text: e.target.value,
+        key: Date.now()
+      }
+    });
   }
-
+  deleteItem(key) {
+    const filteredItems = this.state.items.filter((item) => item.key !== key);
+    this.setState({
+      items: filteredItems
+    });
+  }
+  setUpdate(text, key) {
+    console.log("items:" + this.state.items);
+    const items = this.state.items;
+    items.map((item) => {
+      if (item.key === key) {
+        console.log(item.key + "    " + key);
+        item.text = text;
+      }
+    });
+    this.setState({
+      items: items
+    });
+  }
   render() {
     return (
       <div className="App">
-        <h1>To do list</h1>
-        <input
-          type="text"
-          name="item"
-          onChange={this.handleInputChange}
-        ></input>
-        <br></br>
-        <br />
-        <button type="submit" onClick={this.submitItem}>
-          Submit
-        </button>
+        <header>
+          <form id="to-do-form" onSubmit={this.addItem}>
+            <input
+              type="text"
+              placeholder="Enter task"
+              value={this.state.currentItem.text}
+              onChange={this.handleInput}
+            ></input>
+            <button type="submit">Add</button>
+          </form>
+          <p>{this.state.items.text}</p>
 
-        <h2> List are: </h2>
-
-        {this.state.items.map((item) => {
-          return <p>{item}</p>;
-        })}
+          <ListItems
+            items={this.state.items}
+            deleteItem={this.deleteItem}
+            setUpdate={this.setUpdate}
+          />
+        </header>
       </div>
     );
   }
